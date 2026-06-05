@@ -35,6 +35,9 @@ function getColorSwatch(color: string) {
   if (normalized === "azul") return "#3b82f6";
   if (normalized === "cinza") return "#94a3b8";
   if (normalized === "verde") return "#10b981";
+  if (normalized === "dourado") return "#d3af37";
+  if (normalized === "amarelo") return "#ffff00";
+  if (normalized === "laranja") return "#ff5c00";
 
   return "#e2e8f0";
 }
