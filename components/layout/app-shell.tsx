@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { CarFront, ChevronRight, CirclePlus, Grid2x2, Menu, X } from "lucide-react";
+import { buildCreateVehicleHref, getCurrentPathWithQuery } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -12,12 +13,30 @@ const navItems = [
   { href: "/vehicles/new", label: "Cadastrar", icon: CirclePlus },
 ];
 
+function isNavItemActive(pathname: string, href: string) {
+  if (href === "/") {
+    return pathname === "/";
+  }
+
+  if (href === "/vehicles") {
+    return pathname === "/vehicles" || pathname.startsWith("/vehicles/") && !pathname.startsWith("/vehicles/new");
+  }
+
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const createVehicleHref = useMemo(() => {
+    const currentRoute = getCurrentPathWithQuery(pathname, searchParams);
+    return buildCreateVehicleHref(currentRoute);
+  }, [pathname, searchParams]);
+
   const sidebar = (
-    <div className="flex h-full flex-col bg-white border-r border-slate-200 shadow-sm">
+    <div className="flex h-full flex-col border-r border-slate-200 bg-white shadow-sm">
       <div className="flex h-20 items-center gap-3 border-b border-slate-100 px-6">
         <span className="text-[2rem] font-black tracking-tight text-slate-800">
           Auto<span className="text-indigo-600">Manager</span>
@@ -27,12 +46,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex-1 space-y-2 overflow-y-auto px-4 py-6">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+          const isActive = isNavItemActive(pathname, item.href);
+          const href = item.href === "/vehicles/new" ? createVehicleHref : item.href;
 
           return (
             <Link
               key={item.href}
-              href={item.href}
+              href={href}
               onClick={() => setMobileOpen(false)}
               className={cn(
                 "group flex items-center justify-between rounded-2xl px-4 py-3.5 transition-all duration-200",

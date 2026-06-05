@@ -1,15 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createVehicle } from "@/lib/api";
 import { VehicleForm } from "@/components/vehicles/vehicle-form";
 import { VehicleFormValues } from "@/lib/types";
 import { buildVehiclePayload } from "@/lib/vehicle";
+import { getReturnLabel, normalizeReturnPath } from "@/lib/navigation";
 
 export function VehicleCreateScreen() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const returnHref = useMemo(() => normalizeReturnPath(searchParams.get("from")), [searchParams]);
+  const returnLabel = useMemo(() => getReturnLabel(searchParams.get("from")), [searchParams]);
 
   async function handleSubmit(values: VehicleFormValues) {
     setIsSubmitting(true);
@@ -31,6 +36,9 @@ export function VehicleCreateScreen() {
       mode="create"
       isSubmitting={isSubmitting}
       onSubmit={handleSubmit}
+      backHref={returnHref}
+      breadcrumbHref={returnHref}
+      breadcrumbLabel={returnLabel}
     />
   );
 }

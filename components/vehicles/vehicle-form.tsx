@@ -44,7 +44,7 @@ export function VehicleForm({
   const helperText = useMemo(
     () => ({
       plate: "Formatos aceitos: ABC1234 ou ABC1D23.",
-      year: "Ano entre 1886 e 9999.",
+      year: "Ano entre 1950 e 2026.",
       brand: "Até 120 caracteres.",
       model: "Até 120 caracteres.",
       color: "Até 60 caracteres.",
@@ -115,38 +115,57 @@ export function VehicleForm({
     max?: number;
   }> = [
     { id: "plate", label: "Placa", maxLength: 7 },
-    { id: "year", label: "Ano", type: "number", min: 1886, max: 9999 },
+    { id: "year", label: "Ano", type: "number", min: 1950, max: 2026 },
     { id: "brand", label: "Marca", maxLength: 120 },
     { id: "model", label: "Modelo", maxLength: 120 },
     { id: "color", label: "Cor", maxLength: 60 },
   ];
 
+  const shouldShowBreadcrumb = Boolean(backHref || breadcrumbHref || breadcrumbLabel);
+
   return (
     <div className="mx-auto max-w-3xl space-y-6 animate-in fade-in duration-500">
-      {backHref || breadcrumbHref ? (
+      {shouldShowBreadcrumb ? (
         <div className="flex items-center gap-3">
-          {backHref ? (
-            <Link
-              href={backHref}
-              className="-ml-2 rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900"
-              aria-label="Voltar"
-            >
-              <ArrowLeft className="size-6" />
-            </Link>
-          ) : null}
-          {breadcrumbHref && breadcrumbLabel ? (
-            <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
-              <Link href="/vehicles" className="transition-colors hover:text-slate-900">
-                Veículos
-              </Link>
-              <span>/</span>
-              <Link href={breadcrumbHref} className="transition-colors hover:text-slate-900">
-                {breadcrumbLabel}
-              </Link>
-              <span>/</span>
-              <span className="text-slate-900">Editar</span>
-            </div>
-          ) : null}
+          <Link
+            href={backHref ?? "/vehicles"}
+            className="-ml-2 rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900"
+            aria-label="Voltar"
+          >
+            <ArrowLeft className="size-6" />
+          </Link>
+
+          <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
+            {mode === "edit" ? (
+              <>
+                <Link href="/vehicles" className="transition-colors hover:text-slate-900">
+                  Veículos
+                </Link>
+                <span>/</span>
+                {breadcrumbHref && breadcrumbLabel ? (
+                  <>
+                    <Link href={breadcrumbHref} className="transition-colors hover:text-slate-900">
+                      {breadcrumbLabel}
+                    </Link>
+                    <span>/</span>
+                  </>
+                ) : null}
+                <span className="text-slate-900">Editar</span>
+              </>
+            ) : (
+              <>
+                {breadcrumbHref && breadcrumbLabel ? (
+                  <>
+                    <Link href={breadcrumbHref} className="transition-colors hover:text-slate-900">
+                      {breadcrumbLabel}
+                    </Link>
+                    <span>/</span>
+                  </>
+                ) : null}
+                <span className="text-slate-900">Cadastrar</span>
+              </>
+            )}
+          </div>
         </div>
       ) : null}
 

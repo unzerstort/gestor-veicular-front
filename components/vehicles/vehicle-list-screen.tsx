@@ -15,6 +15,7 @@ import { ConfirmDialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { buildCreateVehicleHref, getCurrentPathWithQuery } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
 function getFiltersFromSearchParams(searchParams: Pick<URLSearchParams, "get">): VehicleFilters {
@@ -43,6 +44,7 @@ export function VehicleListScreen() {
   const pathname = usePathname();
   const router = useRouter();
   const initialFilters = useMemo(() => getFiltersFromSearchParams(searchParams), [searchParams]);
+  const createVehicleHref = useMemo(() => buildCreateVehicleHref(getCurrentPathWithQuery(pathname, searchParams)), [pathname, searchParams]);
 
   const [filters, setFilters] = useState<VehicleFilters>(initialFilters);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -129,7 +131,7 @@ export function VehicleListScreen() {
             <p className="mt-1 text-slate-500">Gerencie os veículos da sua frota</p>
           </div>
           <Link
-            href="/vehicles/new"
+            href={createVehicleHref}
             className={cn(
               buttonVariants(),
               "rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-200 hover:bg-indigo-700 hover:shadow-md",
@@ -216,65 +218,8 @@ export function VehicleListScreen() {
                 />
               </div>
             ) : (
-              <>
-                <div className="space-y-3 p-4 md:hidden">
-                  {vehicles.map((vehicle) => (
-                    <Card key={vehicle.id} className="rounded-2xl border border-slate-100 bg-white shadow-sm">
-                      <CardContent className="space-y-4 p-5">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <span className="inline-flex items-center rounded-lg border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-bold tracking-widest text-indigo-700">
-                              {vehicle.plate}
-                            </span>
-                            <p className="mt-3 text-base font-semibold text-slate-900">{vehicle.brand}</p>
-                            <p className="text-sm text-slate-500">{vehicle.model}</p>
-                          </div>
-                          <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-600">
-                            {vehicle.year}
-                          </Badge>
-                        </div>
-
-                        <div className="space-y-2 text-sm text-slate-500">
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="size-3 rounded-full border border-black/10 shadow-inner"
-                              style={{ backgroundColor: getColorSwatch(vehicle.color) }}
-                            />
-                            <span>{vehicle.color}</span>
-                          </div>
-                          <p>Atualizado em {formatTimestamp(vehicle.updatedAt)}</p>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <Link
-                            href={`/vehicles/${vehicle.id}`}
-                            className="inline-flex flex-1 items-center justify-center rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-indigo-50 hover:text-indigo-700"
-                          >
-                            <Eye className="mr-2 size-4" />
-                            Detalhes
-                          </Link>
-                          <Link
-                            href={`/vehicles/${vehicle.id}/edit`}
-                            className="inline-flex flex-1 items-center justify-center rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-emerald-50 hover:text-emerald-700"
-                          >
-                            <Pencil className="mr-2 size-4" />
-                            Editar
-                          </Link>
-                          <button
-                            type="button"
-                            onClick={() => setDeleteTarget(vehicle)}
-                            className="inline-flex flex-1 items-center justify-center rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-rose-50 hover:text-rose-700"
-                          >
-                            <Trash2 className="mr-2 size-4" />
-                            Excluir
-                          </button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
-                <div className="hidden md:block">
+              <div className="overflow-x-auto">
+                <div className="min-w-[840px]">
                   <Table>
                     <TableHeader>
                       <TableRow className="border-b border-slate-200 bg-slate-50/50 hover:bg-slate-50/50">
@@ -290,7 +235,7 @@ export function VehicleListScreen() {
                       {vehicles.map((vehicle) => (
                         <TableRow key={vehicle.id} className="border-b-0 hover:bg-slate-50/80">
                           <TableCell className="px-6 py-4">
-                            <span className="inline-flex items-center rounded-lg border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-bold tracking-widest text-indigo-700">
+                            <span className="inline-flex items-center rounded-sm border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-bold tracking-widest text-indigo-700">
                               {vehicle.plate}
                             </span>
                           </TableCell>
@@ -340,7 +285,7 @@ export function VehicleListScreen() {
                     </TableBody>
                   </Table>
                 </div>
-              </>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -348,13 +293,12 @@ export function VehicleListScreen() {
 
       <ConfirmDialog
         open={Boolean(deleteTarget)}
-        title="Excluir veículo?"
-        description={deleteTarget ? `Essa ação remove o registro da placa ${deleteTarget.plate}. Confirme apenas se tiver certeza.` : ""}
-        confirmLabel="Excluir"
-        confirmVariant="destructive"
-        isConfirming={isDeleting}
-        onConfirm={handleDelete}
-        onClose={() => setDeleteTarget(null)}
+        title="Excluir veículo"
+        description={`Tem certeza que deseja excluir o veículo ${deleteTarget?.plate ?? "selecionado"}? Esta ação não pode ser desfeita.`}
+        confirmLabel={isDeleting ? "Excluindo..." : "Excluir"}
+        cancelLabel="Cancelar"
+        onConfirm={() => void handleDelete()}
+        onCancel={() => (!isDeleting ? setDeleteTarget(null) : undefined)}
       />
     </>
   );

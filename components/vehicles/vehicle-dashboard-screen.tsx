@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Activity, ArrowRight, CarFront, CirclePlus, LayoutDashboard, ListFilter, Server } from "lucide-react";
 import { fetchHealth, fetchVehicles } from "@/lib/api";
 import { Vehicle } from "@/lib/types";
@@ -12,6 +13,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { StatusBanner } from "@/components/ui/status-banner";
+import { buildCreateVehicleHref, getCurrentPathWithQuery } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
 const metricAccentStyles = [
@@ -118,15 +120,6 @@ function BrandBarChart({
           ))}
         </div>
       </div>
-
-      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-        {items.map((item) => (
-          <div key={item.label} className="rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600">
-            <span className="font-semibold text-slate-800">{item.label}</span>: {item.count}
-            {maxCount > 0 ? <span className="text-slate-400"> ({Math.round((item.count / maxCount) * 100)}% do topo)</span> : null}
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
@@ -210,6 +203,9 @@ function ActivityList({
 }
 
 export function VehicleDashboardScreen() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const createVehicleHref = useMemo(() => buildCreateVehicleHref(getCurrentPathWithQuery(pathname, searchParams)), [pathname, searchParams]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [vehiclesError, setVehiclesError] = useState("");
   const [isVehiclesLoading, setIsVehiclesLoading] = useState(true);
@@ -280,12 +276,14 @@ export function VehicleDashboardScreen() {
             API: {healthStatus}
           </Badge>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-[3.25rem]">Boas vindas ao AutoManager!</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-[3.25rem]">
+          Boas vindas ao <span className="font-black">Auto<span className="text-indigo-600">Manager</span></span>!
+        </h1>
         <p className="text-slate-500 sm:text-xl">Visão geral da sua frota e atividades recentes.</p>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-        <Link href="/vehicles/new" className={cn(buttonVariants(), "bg-gradient-to-r from-indigo-500 to-violet-600 shadow-lg shadow-indigo-200 hover:opacity-95")}>
+        <Link href={createVehicleHref} className={cn(buttonVariants(), "bg-gradient-to-r from-indigo-500 to-violet-600 shadow-lg shadow-indigo-200 hover:opacity-95")}>
           <CirclePlus className="h-4 w-4" />
           Cadastrar veículo
         </Link>
@@ -311,28 +309,28 @@ export function VehicleDashboardScreen() {
           {isVehiclesLoading
             ? Array.from({ length: 4 }).map((_, index) => <DashboardMetricSkeleton key={index} />)
             : summaryCards.map((item, index) => {
-                const Icon = item.icon;
-                const accent = metricAccentStyles[index % metricAccentStyles.length];
+              const Icon = item.icon;
+              const accent = metricAccentStyles[index % metricAccentStyles.length];
 
-                return (
-                  <Card
-                    key={item.title}
-                    className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-                  >
-                    <div className={cn("absolute -right-6 -top-6 size-24 rounded-full opacity-10 transition-transform duration-500 group-hover:scale-150", accent.blob)} />
-                    <CardContent className="relative z-10 flex items-center justify-between p-0">
-                      <div>
-                        <p className="mb-1 max-w-[13ch] text-sm font-semibold text-slate-500">{item.title}</p>
-                        <p className="text-3xl font-black text-slate-800">{item.value}</p>
-                        <p className="mt-2 max-w-[22ch] text-sm text-slate-500">{item.description}</p>
-                      </div>
-                      <div className={cn("flex size-14 items-center justify-center rounded-xl shadow-sm transition-transform duration-300 group-hover:scale-110", accent.bg, accent.color)}>
-                        <Icon className="size-7" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+              return (
+                <Card
+                  key={item.title}
+                  className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div className={cn("absolute -right-6 -top-6 size-24 rounded-full opacity-10 transition-transform duration-500 group-hover:scale-150", accent.blob)} />
+                  <CardContent className="relative z-10 flex items-center justify-between p-0">
+                    <div>
+                      <p className="mb-1 max-w-[13ch] text-sm font-semibold text-slate-500">{item.title}</p>
+                      <p className="text-3xl font-black text-slate-800">{item.value}</p>
+                      <p className="mt-2 max-w-[22ch] text-sm text-slate-500">{item.description}</p>
+                    </div>
+                    <div className={cn("flex size-14 items-center justify-center rounded-xl shadow-sm transition-transform duration-300 group-hover:scale-110", accent.bg, accent.color)}>
+                      <Icon className="size-7" />
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
         </div>
       </section>
 
@@ -345,7 +343,7 @@ export function VehicleDashboardScreen() {
                 Cadastre o primeiro veículo para liberar os indicadores da dashboard, acompanhar atividade recente e começar a organizar a operação.
               </p>
             </div>
-            <Link href="/vehicles/new" className={cn(buttonVariants(), "bg-gradient-to-r from-indigo-500 to-violet-600 shadow-lg shadow-indigo-200")}>
+            <Link href={createVehicleHref} className={cn(buttonVariants(), "bg-gradient-to-r from-indigo-500 to-violet-600 shadow-lg shadow-indigo-200")}>
               <CirclePlus className="h-4 w-4" />
               Cadastrar primeiro veículo
             </Link>

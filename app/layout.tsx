@@ -3,7 +3,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Gestor Veicular",
+  title: "AutoManager - Gerenciamento de Veículos",
   description: "Interface de gerenciamento de veículos com foco em acessibilidade e responsividade.",
 };
 

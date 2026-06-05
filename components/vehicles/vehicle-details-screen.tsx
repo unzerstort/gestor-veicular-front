@@ -156,7 +156,7 @@ export function VehicleDetailsScreen({ vehicleId }: { vehicleId: string }) {
                 </div>
 
                 <div>
-                  <span className="mb-4 inline-flex w-max items-center rounded-lg border border-white/30 bg-white/20 px-3 py-1 text-sm font-bold tracking-widest backdrop-blur-md">
+                  <span className="mt-1 mb-4 inline-flex w-max items-center rounded-sm border border-white/30 bg-white/20 px-3 py-1 text-sm font-bold tracking-widest backdrop-blur-md">
                     {vehicle.plate}
                   </span>
                   <h1 className="mb-1 text-4xl font-black">{vehicle.model}</h1>
