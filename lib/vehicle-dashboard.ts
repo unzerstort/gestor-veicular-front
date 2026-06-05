@@ -5,16 +5,17 @@ import {
   VehicleDashboardSummary,
   VehicleYearBucketDistributionItem,
 } from "@/lib/types";
+import { MAX_VEHICLE_YEAR, MIN_VEHICLE_YEAR } from "@/lib/vehicle";
 
 const RECENT_WINDOW_DAYS = 7;
 const ACTIVITY_LIMIT = 5;
 
 const yearBuckets = [
-  { label: "Até 2010", matches: (year: number) => year <= 2010 },
+  { label: "Até 2010", matches: (year: number) => year >= MIN_VEHICLE_YEAR && year <= 2010 },
   { label: "2011 a 2015", matches: (year: number) => year >= 2011 && year <= 2015 },
   { label: "2016 a 2020", matches: (year: number) => year >= 2016 && year <= 2020 },
   { label: "2021 a 2025", matches: (year: number) => year >= 2021 && year <= 2025 },
-  { label: "2026+", matches: (year: number) => year >= 2026 },
+  { label: "2026", matches: (year: number) => year === MAX_VEHICLE_YEAR },
 ] as const;
 
 function parseTimestamp(value: string) {
@@ -99,7 +100,7 @@ function getVehiclesByYearBucket(vehicles: Vehicle[]): VehicleYearBucketDistribu
 function getFleetRange(vehicles: Vehicle[]) {
   const years = vehicles
     .map((vehicle) => vehicle.year)
-    .filter((year) => Number.isInteger(year) && year >= 1886 && year <= 9999)
+    .filter((year) => Number.isInteger(year) && year >= MIN_VEHICLE_YEAR && year <= MAX_VEHICLE_YEAR)
     .sort((left, right) => left - right);
 
   return {

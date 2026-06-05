@@ -260,6 +260,7 @@ export function VehicleListScreen() {
                                 href={`/vehicles/${vehicle.id}`}
                                 className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-indigo-50 hover:text-indigo-600"
                                 title="Visualizar"
+                                aria-label={`Visualizar veículo ${vehicle.plate}`}
                               >
                                 <Eye className="size-4" />
                               </Link>
@@ -267,6 +268,7 @@ export function VehicleListScreen() {
                                 href={`/vehicles/${vehicle.id}/edit`}
                                 className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
                                 title="Editar"
+                                aria-label={`Editar veículo ${vehicle.plate}`}
                               >
                                 <Pencil className="size-4" />
                               </Link>
@@ -275,6 +277,7 @@ export function VehicleListScreen() {
                                 onClick={() => setDeleteTarget(vehicle)}
                                 className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
                                 title="Excluir"
+                                aria-label={`Excluir veículo ${vehicle.plate}`}
                               >
                                 <Trash2 className="size-4" />
                               </button>
@@ -295,10 +298,12 @@ export function VehicleListScreen() {
         open={Boolean(deleteTarget)}
         title="Excluir veículo"
         description={`Tem certeza que deseja excluir o veículo ${deleteTarget?.plate ?? "selecionado"}? Esta ação não pode ser desfeita.`}
-        confirmLabel={isDeleting ? "Excluindo..." : "Excluir"}
+        confirmLabel="Excluir"
         cancelLabel="Cancelar"
+        isConfirming={isDeleting}
+        confirmVariant="destructive"
         onConfirm={() => void handleDelete()}
-        onCancel={() => (!isDeleting ? setDeleteTarget(null) : undefined)}
+        onClose={() => (!isDeleting ? setDeleteTarget(null) : undefined)}
       />
     </>
   );

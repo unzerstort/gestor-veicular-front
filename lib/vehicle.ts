@@ -1,6 +1,10 @@
 import { Vehicle, VehicleFormValues } from "@/lib/types";
 
 const platePattern = /^[A-Z]{3}\d{4}$|^[A-Z]{3}\d[A-Z]\d{2}$/;
+const INVALID_DATE_LABEL = "Data indisponível";
+
+export const MIN_VEHICLE_YEAR = 1950;
+export const MAX_VEHICLE_YEAR = 2026;
 
 export function normalizePlate(value: string) {
   return value.toUpperCase().replace(/[^A-Z0-9]/g, "");
@@ -54,8 +58,8 @@ export function validateVehicle(values: VehicleFormValues, partial = false) {
 
     if (!year) {
       errors.year = "Informe o ano.";
-    } else if (!Number.isInteger(numericYear) || numericYear < 1886 || numericYear > 9999) {
-      errors.year = "Use um ano inteiro entre 1886 e 9999.";
+    } else if (!Number.isInteger(numericYear) || numericYear < MIN_VEHICLE_YEAR || numericYear > MAX_VEHICLE_YEAR) {
+      errors.year = `Use um ano inteiro entre ${MIN_VEHICLE_YEAR} e ${MAX_VEHICLE_YEAR}.`;
     }
   }
 
@@ -94,8 +98,14 @@ export function buildVehiclePatchPayload(initial: Vehicle, values: VehicleFormVa
 }
 
 export function formatTimestamp(value: string) {
+  const parsedDate = new Date(value);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return INVALID_DATE_LABEL;
+  }
+
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(value));
+  }).format(parsedDate);
 }

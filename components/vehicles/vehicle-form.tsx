@@ -5,7 +5,13 @@ import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
 import { ApiError } from "@/lib/api";
 import { ProblemDetails, Vehicle, VehicleFormValues } from "@/lib/types";
-import { createVehicleFormValues, normalizePlate, validateVehicle } from "@/lib/vehicle";
+import {
+  createVehicleFormValues,
+  MAX_VEHICLE_YEAR,
+  MIN_VEHICLE_YEAR,
+  normalizePlate,
+  validateVehicle,
+} from "@/lib/vehicle";
 import { StatusBanner } from "@/components/ui/status-banner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -44,7 +50,7 @@ export function VehicleForm({
   const helperText = useMemo(
     () => ({
       plate: "Formatos aceitos: ABC1234 ou ABC1D23.",
-      year: "Ano entre 1950 e 2026.",
+      year: `Ano entre ${MIN_VEHICLE_YEAR} e ${MAX_VEHICLE_YEAR}.`,
       brand: "Até 120 caracteres.",
       model: "Até 120 caracteres.",
       color: "Até 60 caracteres.",
@@ -115,7 +121,7 @@ export function VehicleForm({
     max?: number;
   }> = [
     { id: "plate", label: "Placa", maxLength: 7 },
-    { id: "year", label: "Ano", type: "number", min: 1950, max: 2026 },
+    { id: "year", label: "Ano", type: "number", min: MIN_VEHICLE_YEAR, max: MAX_VEHICLE_YEAR },
     { id: "brand", label: "Marca", maxLength: 120 },
     { id: "model", label: "Modelo", maxLength: 120 },
     { id: "color", label: "Cor", maxLength: 60 },
